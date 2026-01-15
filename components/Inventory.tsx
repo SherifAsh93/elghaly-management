@@ -92,6 +92,29 @@ const Inventory: React.FC<InventoryProps> = ({ isAdmin }) => {
     }
   };
 
+  const handleDelete = async (id: number, name: string) => {
+    if (!isAdmin) return;
+    const confirmDelete = confirm(
+      `هل أنت متأكد من حذف الصنف "${name}" نهائياً من المخزن؟\nلا يمكن التراجع عن هذا الإجراء.`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`/api/inventory/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        alert("✅ تم حذف الصنف بنجاح");
+        fetchData();
+      } else {
+        const err = await res.json();
+        alert("❌ خطأ في الحذف: " + err.error);
+      }
+    } catch (err) {
+      alert("❌ فشل الاتصال بالسيرفر");
+    }
+  };
+
   const filtered = goods.filter(
     (g) =>
       g.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -198,7 +221,7 @@ const Inventory: React.FC<InventoryProps> = ({ isAdmin }) => {
               </div>
 
               {/* Quick Actions */}
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 <button
                   onClick={() => {
                     setSelectedItem(item);
@@ -210,16 +233,26 @@ const Inventory: React.FC<InventoryProps> = ({ isAdmin }) => {
                   <span>🛒</span> بيع سريع
                 </button>
                 {isAdmin && (
-                  <button
-                    onClick={() => {
-                      setSelectedItem(item);
-                      setEditData(item);
-                      setShowEditModal(true);
-                    }}
-                    className="w-14 h-14 bg-white border border-slate-200 text-slate-400 rounded-2xl flex items-center justify-center hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 transition-all shadow-sm"
-                  >
-                    ⚙️
-                  </button>
+                  <>
+                    <button
+                      onClick={() => {
+                        setSelectedItem(item);
+                        setEditData(item);
+                        setShowEditModal(true);
+                      }}
+                      className="w-12 h-14 bg-white border border-slate-200 text-slate-400 rounded-2xl flex items-center justify-center hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200 transition-all shadow-sm"
+                      title="تعديل"
+                    >
+                      ⚙️
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item.id, item.name)}
+                      className="w-12 h-14 bg-white border border-slate-200 text-rose-300 rounded-2xl flex items-center justify-center hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all shadow-sm"
+                      title="حذف الصنف"
+                    >
+                      🗑️
+                    </button>
+                  </>
                 )}
               </div>
             </div>
