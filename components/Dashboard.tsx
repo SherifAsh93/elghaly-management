@@ -28,6 +28,7 @@ const Dashboard: React.FC = () => {
       if (!res.ok) throw new Error("Server responded with error");
       const data = await res.json();
       setStats(data);
+      setErrorOccurred(false);
     } catch (err) {
       console.warn("Dashboard fetch failed", err);
       setErrorOccurred(true);
@@ -37,18 +38,18 @@ const Dashboard: React.FC = () => {
   };
 
   const runDbSetup = async () => {
-    setSetupStatus("جاري التحقق...");
+    setSetupStatus("جاري التحقق من الجداول...");
     try {
       const res = await fetch("/api/setup-db");
       const data = await res.json();
       if (data.success) {
-        setSetupStatus("✅ تم تفعيل الجداول بنجاح");
+        setSetupStatus("✅ السحابة متصلة والجداول جاهزة");
         fetchStats();
       } else {
-        setSetupStatus("❌ فشل: " + data.error);
+        setSetupStatus("❌ خطأ: " + data.error);
       }
     } catch (err) {
-      setSetupStatus("❌ خطأ في الاتصال");
+      setSetupStatus("❌ خطأ في الاتصال بالسحابة");
     }
     setTimeout(() => setSetupStatus(null), 5000);
   };
@@ -65,33 +66,45 @@ const Dashboard: React.FC = () => {
       <div className="p-20 flex flex-col items-center justify-center">
         <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
         <p className="font-black text-slate-400 animate-pulse">
-          جاري تحميل لوحة التحكم...
+          جاري الاتصال بقاعدة البيانات السحابية...
         </p>
       </div>
     );
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      {/* DB Setup Helper */}
-      <div className="bg-orange-50 border border-orange-100 p-6 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-4">
+      {/* Cloud Status Helper */}
+      <div className="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-4 shadow-2xl">
         <div className="flex items-center gap-4">
-          <span className="text-2xl">🛠️</span>
+          <div className="w-12 h-12 bg-orange-600 rounded-2xl flex items-center justify-center text-xl shadow-lg shadow-orange-900/40">
+            ☁️
+          </div>
           <div>
-            <p className="font-black text-orange-900 text-sm">
-              إعداد قاعدة البيانات السحابية
+            <p className="font-black text-white text-sm">
+              حالة الربط السحابي (Turso DB)
             </p>
-            <p className="text-[10px] text-orange-600 font-bold uppercase tracking-widest">
-              يجب الضغط هنا مرة واحدة عند أول تشغيل أو عند حدوث أخطاء في الحفظ
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+              البيانات الآن تُحفظ في السحابة بشكل دائم ولا تضيع عند تحديث الكود
             </p>
           </div>
         </div>
         <button
           onClick={runDbSetup}
-          className="bg-orange-600 text-white px-6 py-3 rounded-xl font-black text-xs hover:bg-orange-700 transition-all shadow-lg"
+          className="bg-white/10 text-white px-6 py-3 rounded-xl font-black text-xs hover:bg-white hover:text-slate-900 transition-all border border-white/5"
         >
-          {setupStatus || "تنشيط جداول البيانات"}
+          {setupStatus || "تأكيد تهيئة الجداول"}
         </button>
       </div>
+
+      {errorOccurred && (
+        <div className="bg-rose-50 border border-rose-100 p-4 rounded-2xl flex items-center gap-4 animate-bounce">
+          <span className="text-xl">⚠️</span>
+          <p className="text-xs font-black text-rose-600">
+            تنبيه: تعذر الاتصال بالسحابة. يرجى التأكد من إعداد
+            TURSO_DATABASE_URL في Vercel ثم اضغط تأكيد التهيئة أعلاه.
+          </p>
+        </div>
+      )}
 
       {/* Top Statistic Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -138,7 +151,7 @@ const Dashboard: React.FC = () => {
               إحصائيات الدخل والنمو
             </h3>
             <p className="text-sm text-slate-400 font-bold mt-1">
-              تتبع التدفقات المالية لآخر 6 أشهر من العمليات
+              تتبع التدفقات المالية المخزنة سحابياً
             </p>
           </div>
         </div>
@@ -175,12 +188,7 @@ const Dashboard: React.FC = () => {
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 font-bold uppercase tracking-widest gap-4">
                 <span className="text-6xl opacity-20">📊</span>
-                <p>لا توجد بيانات دخل كافية للعرض حالياً</p>
-                {errorOccurred && (
-                  <p className="text-[10px] text-rose-400 font-black">
-                    خطأ في الاتصال بالسيرفر - يرجى تنشيط الجداول أعلاه
-                  </p>
-                )}
+                <p>لا توجد بيانات دخل سحابية مسجلة</p>
               </div>
             )}
           </div>
