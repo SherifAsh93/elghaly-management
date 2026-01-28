@@ -1,4 +1,3 @@
-import { neon } from "@neondatabase/serverless";
 import {
   ProductItem,
   Sale,
@@ -8,19 +7,37 @@ import {
   ClientType,
 } from "./types";
 
+let neon: any = null;
+let connectionError = false;
+
+// Lazy load neon to prevent initialization errors
+const loadNeon = async () => {
+  if (!neon && !connectionError) {
+    try {
+      const { neon: neonImport } = await import("@neondatabase/serverless");
+      neon = neonImport;
+    } catch (e) {
+      console.warn("[v0] Failed to load Neon:", e);
+      connectionError = true;
+    }
+  }
+  return neon;
+};
+
 const CONNECTION_STRING = import.meta.env.VITE_DATABASE_URL || 
   "postgresql://neondb_owner:npg_UdyKDe9VISi3@ep-late-wind-adswy2v6-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
 
 let sql: any = null;
-let connectionError = false;
 
 // Initialize database connection safely with lazy initialization
-const initConnection = () => {
+const initConnection = async () => {
   if (connectionError) return null;
   
   if (!sql) {
     try {
-      sql = neon(CONNECTION_STRING);
+      const neonFn = await loadNeon();
+      if (!neonFn) return null;
+      sql = neonFn(CONNECTION_STRING);
       console.log("[v0] Database connection initialized successfully");
     } catch (e) {
       console.warn("[v0] Database connection failed, using localStorage fallback:", e);
@@ -43,7 +60,7 @@ const storage = {
 
 export const api = {
   initDatabase: async () => {
-    const connection = initConnection();
+    const connection = await initConnection();
     if (!connection) {
       console.warn("[v0] No database connection available, using localStorage only");
       return;
@@ -119,7 +136,7 @@ export const api = {
 
   // وظيفة لمسح جميع بيانات النظام (للمدير فقط)
   wipeAllData: async () => {
-    const connection = initConnection();
+    const connection = await initConnection();
     if (!connection) {
       localStorage.clear();
       return true;
@@ -138,7 +155,7 @@ export const api = {
 
   inventory: {
     getAll: async (): Promise<ProductItem[]> => {
-      const connection = initConnection();
+      const connection = await initConnection();
       if (!connection) {
         return storage.get("inventory") || [];
       }
@@ -166,7 +183,7 @@ export const api = {
       }
     },
     save: async (item: ProductItem) => {
-      const connection = initConnection();
+      const connection = await initConnection();
       if (!connection) {
         const items = storage.get("inventory") || [];
         const index = items.findIndex((i: any) => i.code === item.code);
@@ -196,7 +213,7 @@ export const api = {
       }
     },
     delete: async (id: string) => {
-      const connection = initConnection();
+      const connection = await initConnection();
       if (!connection) {
         const items = storage.get("inventory") || [];
         storage.set("inventory", items.filter((i: any) => i.id !== id));
@@ -213,7 +230,7 @@ export const api = {
 
   sales: {
     getAll: async (): Promise<Sale[]> => {
-      const connection = initConnection();
+      const connection = await initConnection();
       if (!connection) {
         return storage.get("sales") || [];
       }
@@ -237,7 +254,7 @@ export const api = {
       }
     },
     add: async (sale: Sale) => {
-      const connection = initConnection();
+      const connection = await initConnection();
       if (!connection) {
         const sales = storage.get("sales") || [];
         sales.push(sale);
@@ -255,7 +272,7 @@ export const api = {
       }
     },
     delete: async (id: string) => {
-      const connection = initConnection();
+      const connection = await initConnection();
       if (!connection) {
         const sales = storage.get("sales") || [];
         storage.set("sales", sales.filter((s: any) => s.id !== id));
@@ -275,7 +292,7 @@ export const api = {
 
   clients: {
     getAll: async (): Promise<Client[]> => {
-      const connection = initConnection();
+      const connection = await initConnection();
       if (!connection) {
         return storage.get("clients") || [];
       }
@@ -294,7 +311,7 @@ export const api = {
       }
     },
     save: async (client: Client) => {
-      const connection = initConnection();
+      const connection = await initConnection();
       if (!connection) {
         const clients = storage.get("clients") || [];
         const index = clients.findIndex((c: any) => c.name === client.name);
@@ -321,7 +338,7 @@ export const api = {
       for (const c of clients) await api.clients.save(c);
     },
     delete: async (id: string) => {
-      const connection = initConnection();
+      const connection = await initConnection();
       if (!connection) {
         const clients = storage.get("clients") || [];
         storage.set("clients", clients.filter((c: any) => c.id !== id));
@@ -338,7 +355,7 @@ export const api = {
 
   employees: {
     getAll: async (): Promise<Employee[]> => {
-      const connection = initConnection();
+      const connection = await initConnection();
       if (!connection) {
         return storage.get("employees") || [];
       }
@@ -357,7 +374,7 @@ export const api = {
       }
     },
     save: async (emp: Employee) => {
-      const connection = initConnection();
+      const connection = await initConnection();
       if (!connection) {
         const employees = storage.get("employees") || [];
         const index = employees.findIndex((e: any) => e.name === emp.name);
@@ -377,7 +394,7 @@ export const api = {
       for (const e of employees) await api.employees.save(e);
     },
     delete: async (id: string) => {
-      const connection = initConnection();
+      const connection = await initConnection();
       if (!connection) {
         const employees = storage.get("employees") || [];
         storage.set("employees", employees.filter((e: any) => e.id !== id));
@@ -394,7 +411,7 @@ export const api = {
 
   purchases: {
     getAll: async (): Promise<Purchase[]> => {
-      const connection = initConnection();
+      const connection = await initConnection();
       if (!connection) {
         return storage.get("purchases") || [];
       }
@@ -414,7 +431,7 @@ export const api = {
       }
     },
     add: async (p: Purchase) => {
-      const connection = initConnection();
+      const connection = await initConnection();
       if (!connection) {
         const purchases = storage.get("purchases") || [];
         purchases.push(p);
@@ -429,7 +446,7 @@ export const api = {
       }
     },
     delete: async (id: string) => {
-      const connection = initConnection();
+      const connection = await initConnection();
       if (!connection) {
         const purchases = storage.get("purchases") || [];
         storage.set("purchases", purchases.filter((p: any) => p.id !== id));
