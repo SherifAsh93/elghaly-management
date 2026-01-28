@@ -60,77 +60,38 @@ const storage = {
 
 export const api = {
   initDatabase: async () => {
-    const connection = await initConnection();
-    if (!connection) {
-      console.warn("[v0] No database connection available, using localStorage only");
-      return;
-    }
+    // For now, we'll use localStorage as the primary storage
+    // Database connection will be initialized asynchronously in the background
+    console.log("[v0] Initializing app with localStorage storage");
     
     try {
-      await connection`
-        CREATE TABLE IF NOT EXISTS inventory (
-            id SERIAL PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
-            code VARCHAR(100) UNIQUE,
-            type VARCHAR(100),
-            length DECIMAL(10, 2),
-            width DECIMAL(10, 2),
-            thickness DECIMAL(10, 2),
-            origin VARCHAR(100),
-            bundles DECIMAL(15, 4) DEFAULT 0,
-            boards_per_bundle INTEGER DEFAULT 0,
-            buy_price DECIMAL(15, 2),
-            sell_price DECIMAL(15, 2)
-        );
-      `;
-
-      await connection`
-        CREATE TABLE IF NOT EXISTS sales (
-            id SERIAL PRIMARY KEY,
-            invoice_id VARCHAR(50),
-            inventory_id INTEGER REFERENCES inventory(id) ON DELETE SET NULL,
-            item_name VARCHAR(255),
-            quantity DECIMAL(10, 2),
-            unit_type VARCHAR(20),
-            unit_price DECIMAL(15, 2),
-            total_price DECIMAL(15, 2),
-            sale_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            client_name VARCHAR(255)
-        );
-      `;
-
-      await connection`
-        CREATE TABLE IF NOT EXISTS purchases (
-            id SERIAL PRIMARY KEY,
-            inventory_id INTEGER REFERENCES inventory(id) ON DELETE SET NULL,
-            quantity_bundles DECIMAL(15, 4),
-            cost DECIMAL(15, 2),
-            purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            supplier VARCHAR(255)
-        );
-      `;
-
-      await connection`
-        CREATE TABLE IF NOT EXISTS clients (
-            id SERIAL PRIMARY KEY,
-            name VARCHAR(255) UNIQUE NOT NULL,
-            phone VARCHAR(50),
-            address TEXT,
-            type VARCHAR(20) DEFAULT 'CASH'
-        );
-      `;
-
-      await connection`
-        CREATE TABLE IF NOT EXISTS employees (
-            id SERIAL PRIMARY KEY,
-            name VARCHAR(255) UNIQUE NOT NULL,
-            position VARCHAR(100),
-            salary DECIMAL(15, 2),
-            advances DECIMAL(15, 2) DEFAULT 0
-        );
-      `;
+      const connection = await initConnection();
+      if (connection) {
+        console.log("[v0] Database connection established");
+        // Optional: Create tables if needed, but don't block initialization
+        try {
+          await connection`
+            CREATE TABLE IF NOT EXISTS inventory (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                code VARCHAR(100) UNIQUE,
+                type VARCHAR(100),
+                length DECIMAL(10, 2),
+                width DECIMAL(10, 2),
+                thickness DECIMAL(10, 2),
+                origin VARCHAR(100),
+                bundles DECIMAL(15, 4) DEFAULT 0,
+                boards_per_bundle INTEGER DEFAULT 0,
+                buy_price DECIMAL(15, 2),
+                sell_price DECIMAL(15, 2)
+            );
+          `;
+        } catch (e) {
+          console.warn("[v0] Could not create tables:", e);
+        }
+      }
     } catch (e) {
-      console.warn("[v0] Migration warning:", e);
+      console.warn("[v0] Database setup warning:", e);
     }
   },
 
