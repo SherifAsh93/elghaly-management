@@ -52,7 +52,9 @@ const App: React.FC = () => {
   const loadData = async () => {
     setIsLoading(true);
     try {
+      console.log("[v0] Starting database initialization...");
       await api.initDatabase();
+      console.log("[v0] Database initialized, loading data...");
       const [inv, sls, pur, clnt, emp] = await Promise.all([
         api.inventory.getAll(),
         api.sales.getAll(),
@@ -60,13 +62,15 @@ const App: React.FC = () => {
         api.clients.getAll(),
         api.employees.getAll(),
       ]);
+      console.log("[v0] Data loaded successfully");
       setInventory(inv);
       setSales(sls);
       setPurchases(pur);
       setClients(clnt);
       setEmployees(emp);
     } catch (error) {
-      console.error("Initialization failed:", error);
+      console.error("[v0] Initialization failed:", error);
+      // App will still load with empty state, localStorage will work as fallback
     } finally {
       setIsLoading(false);
     }
@@ -298,59 +302,60 @@ const App: React.FC = () => {
       />
       <main className="flex-1 w-full flex flex-col min-w-0">
         <div className="max-w-[1200px] w-full mx-auto flex flex-col min-h-screen border-x border-slate-200 bg-white shadow-sm relative">
-          <header className="flex justify-between items-center p-4 md:p-6 no-print bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100">
-            <div className="flex items-center gap-4">
+          <header className="flex justify-between items-center p-4 md:p-8 no-print bg-gradient-to-r from-white via-slate-50/50 to-white backdrop-blur-sm sticky top-0 z-40 border-b border-slate-100 shadow-md">
+            <div className="flex items-center gap-3 md:gap-4">
               <button
                 onClick={() => setIsSidebarOpen(true)}
-                className="md:hidden p-2 bg-slate-50 rounded-xl hover:bg-orange-50 transition-colors"
+                className="md:hidden p-2.5 bg-slate-100 hover:bg-orange-100 text-slate-600 hover:text-orange-600 rounded-lg transition-all duration-300"
               >
-                <Menu size={20} className="text-slate-600" />
+                <Menu size={20} />
               </button>
               <div>
-                <h1 className="text-lg md:text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <h1 className="text-xl md:text-3xl font-black text-slate-900 tracking-tight leading-none">
                   أبناء الغالي
                 </h1>
+                <p className="text-xs text-slate-400 font-bold mt-1 uppercase tracking-wider">نظام إدارة المبيعات والمخزون</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-slate-50 rounded-full border border-slate-100">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="hidden sm:flex items-center gap-2 px-3.5 py-2.5 bg-slate-100 rounded-lg border border-slate-200 hover:border-orange-300 hover:bg-orange-50 transition-all duration-300">
                 <Database
-                  size={10}
+                  size={16}
                   className={
                     isSyncing
                       ? "text-orange-500 animate-spin"
-                      : "text-slate-400"
+                      : "text-slate-500"
                   }
                 />
-                <span className="text-[9px] font-black text-slate-500 uppercase tracking-tighter">
-                  {isSyncing ? "Syncing" : "Online"}
+                <span className={`text-xs font-bold uppercase tracking-widest ${isSyncing ? "text-orange-600" : "text-slate-600"}`}>
+                  {isSyncing ? "جاري..." : "جاهز"}
                 </span>
               </div>
-              <div className="bg-slate-900 px-4 py-2 rounded-2xl border border-slate-800 flex items-center gap-3 shadow-lg">
+              <div className="bg-white px-4 py-3 rounded-xl border border-slate-200 flex items-center gap-3 shadow-md hover:shadow-lg transition-all duration-300">
                 <div className="text-right">
-                  <p className="text-[10px] font-black text-slate-400 leading-none mb-1">
-                    المستخدم الحالي
+                  <p className="text-xs font-bold text-slate-500 leading-none mb-0.5 uppercase tracking-wider">
+                    نوع الحساب
                   </p>
-                  <p className="text-xs font-black text-white">
+                  <p className="text-sm font-black text-slate-900">
                     {userRole === UserRole.ADMIN
-                      ? "المدير العام"
-                      : "موظف مبيعات"}
+                      ? "إدارة"
+                      : "مبيعات"}
                   </p>
                 </div>
-                <div className="w-8 h-8 bg-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-orange-600/20">
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-white shadow-md transition-all ${userRole === UserRole.ADMIN ? "bg-gradient-to-br from-amber-500 to-amber-600" : "bg-gradient-to-br from-orange-500 to-orange-600"}`}>
                   {userRole === UserRole.ADMIN ? (
-                    <ShieldCheck size={16} />
+                    <ShieldCheck size={18} />
                   ) : (
-                    <ShoppingCart size={16} />
+                    <ShoppingCart size={18} />
                   )}
                 </div>
               </div>
             </div>
           </header>
           <div className="p-4 md:p-8 flex-1">{renderContent()}</div>
-          <footer className="p-4 border-t border-slate-50 text-center no-print">
-            <p className="text-[9px] font-bold text-slate-300 uppercase tracking-[0.3em]">
-              Built for Abnaa El-Ghaly • 2024
+          <footer className="p-4 md:p-6 border-t border-slate-100 text-center no-print bg-gradient-to-r from-slate-50 via-white to-slate-50">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              Abnaa El-Ghaly Management System • 2024
             </p>
           </footer>
         </div>

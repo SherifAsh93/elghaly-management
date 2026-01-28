@@ -57,35 +57,37 @@ const Reports: React.FC<ReportsProps> = ({ inventory, sales }) => {
   return (
     <div className="space-y-8 pb-10">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full -translate-y-12 translate-x-12"></div>
-          <div className="flex items-center gap-3 mb-4">
-             <div className="p-2 bg-orange-50 text-orange-600 rounded-lg"><DollarSign size={20}/></div>
-             <h4 className="text-slate-500 font-bold">إجمالي الأرباح المحققة</h4>
+        <div className="bg-gradient-to-br from-white to-slate-50 p-8 rounded-[2rem] border border-slate-200/60 shadow-lg hover:shadow-2xl transition-all duration-500 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-green-100/40 to-transparent rounded-full -translate-y-20 translate-x-20 group-hover:scale-125 transition-transform duration-500"></div>
+          <div className="flex items-center gap-3 mb-6 relative z-10">
+             <div className="p-3.5 bg-gradient-to-br from-green-100 to-green-50 text-green-600 rounded-2xl shadow-sm group-hover:from-green-500 group-hover:to-green-600 group-hover:text-white transition-all duration-300"><DollarSign size={22}/></div>
+             <h4 className="text-slate-600 font-bold text-sm">الأرباح المحققة</h4>
           </div>
-          <p className="text-3xl font-black text-slate-800">{financialStats.actualProfit.toLocaleString()} <span className="text-sm font-normal">ج.م</span></p>
-          <div className="mt-4 flex items-center gap-1 text-green-600 text-sm font-bold">
+          <p className="text-4xl font-black text-slate-900 relative z-10 tracking-tight">{financialStats.actualProfit.toLocaleString()} <span className="text-sm font-normal text-slate-500">ج.م</span></p>
+          <div className="mt-5 flex items-center gap-2 text-green-600 text-xs font-bold relative z-10">
             <TrendingUp size={16} />
             <span>صافي ربح من المبيعات</span>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-3 mb-4">
-             <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Package size={20}/></div>
-             <h4 className="text-slate-500 font-bold">قيمة المخزن الحالي</h4>
+        <div className="bg-gradient-to-br from-white to-slate-50 p-8 rounded-[2rem] border border-slate-200/60 shadow-lg hover:shadow-2xl transition-all duration-500 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-blue-100/40 to-transparent rounded-full -translate-y-20 translate-x-20 group-hover:scale-125 transition-transform duration-500"></div>
+          <div className="flex items-center gap-3 mb-6 relative z-10">
+             <div className="p-3.5 bg-gradient-to-br from-blue-100 to-blue-50 text-blue-600 rounded-2xl shadow-sm group-hover:from-blue-500 group-hover:to-blue-600 group-hover:text-white transition-all duration-300"><Package size={22}/></div>
+             <h4 className="text-slate-600 font-bold text-sm">قيمة المخزن</h4>
           </div>
-          <p className="text-3xl font-black text-slate-800">{financialStats.stockCostValue.toLocaleString()} <span className="text-sm font-normal">ج.م</span></p>
-          <p className="mt-2 text-xs text-slate-400">قيمة شراء البضاعة الموجودة بالمخازن</p>
+          <p className="text-4xl font-black text-slate-900 relative z-10 tracking-tight">{financialStats.stockCostValue.toLocaleString()} <span className="text-sm font-normal text-slate-500">ج.م</span></p>
+          <p className="mt-5 text-xs text-slate-400 font-semibold relative z-10">قيمة شراء البضاعة الموجودة</p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-3 mb-4">
-             <div className="p-2 bg-purple-50 text-purple-600 rounded-lg"><ArrowRightLeft size={20}/></div>
-             <h4 className="text-slate-500 font-bold">المبيعات الإجمالية</h4>
+        <div className="bg-gradient-to-br from-white to-slate-50 p-8 rounded-[2rem] border border-slate-200/60 shadow-lg hover:shadow-2xl transition-all duration-500 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-orange-100/40 to-transparent rounded-full -translate-y-20 translate-x-20 group-hover:scale-125 transition-transform duration-500"></div>
+          <div className="flex items-center gap-3 mb-6 relative z-10">
+             <div className="p-3.5 bg-gradient-to-br from-orange-100 to-orange-50 text-orange-600 rounded-2xl shadow-sm group-hover:from-orange-500 group-hover:to-orange-600 group-hover:text-white transition-all duration-300"><ArrowRightLeft size={22}/></div>
+             <h4 className="text-slate-600 font-bold text-sm">المبيعات الكلية</h4>
           </div>
-          <p className="text-3xl font-black text-slate-800">{financialStats.actualRevenue.toLocaleString()} <span className="text-sm font-normal">ج.م</span></p>
-          <p className="mt-2 text-xs text-slate-400">إجمالي النقدية الواردة من المبيعات</p>
+          <p className="text-4xl font-black text-slate-900 relative z-10 tracking-tight">{financialStats.actualRevenue.toLocaleString()} <span className="text-sm font-normal text-slate-500">ج.م</span></p>
+          <p className="mt-5 text-xs text-slate-400 font-semibold relative z-10">إجمالي النقدية الواردة</p>
         </div>
       </div>
 
