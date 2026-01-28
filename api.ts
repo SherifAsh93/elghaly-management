@@ -8,9 +8,22 @@ import {
   ClientType,
 } from "./types";
 
-const CONNECTION_STRING =
+const CONNECTION_STRING = import.meta.env.VITE_DATABASE_URL || 
   "postgresql://neondb_owner:npg_UdyKDe9VISi3@ep-late-wind-adswy2v6-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
-const sql = neon(CONNECTION_STRING);
+
+let sql: any = null;
+
+// Initialize database connection safely
+const initConnection = () => {
+  if (!sql) {
+    try {
+      sql = neon(CONNECTION_STRING);
+    } catch (e) {
+      console.warn("[v0] Database connection failed, using localStorage fallback", e);
+    }
+  }
+  return sql;
+};
 
 const storage = {
   get: (key: string) => {
@@ -24,8 +37,14 @@ const storage = {
 
 export const api = {
   initDatabase: async () => {
+    const connection = initConnection();
+    if (!connection) {
+      console.warn("[v0] No database connection available, using localStorage only");
+      return;
+    }
+    
     try {
-      await sql`
+      await connection`
         CREATE TABLE IF NOT EXISTS inventory (
             id SERIAL PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
@@ -42,7 +61,7 @@ export const api = {
         );
       `;
 
-      await sql`
+      await connection`
         CREATE TABLE IF NOT EXISTS sales (
             id SERIAL PRIMARY KEY,
             invoice_id VARCHAR(50),
@@ -57,7 +76,7 @@ export const api = {
         );
       `;
 
-      await sql`
+      await connection`
         CREATE TABLE IF NOT EXISTS purchases (
             id SERIAL PRIMARY KEY,
             inventory_id INTEGER REFERENCES inventory(id) ON DELETE SET NULL,
@@ -68,7 +87,7 @@ export const api = {
         );
       `;
 
-      await sql`
+      await connection`
         CREATE TABLE IF NOT EXISTS clients (
             id SERIAL PRIMARY KEY,
             name VARCHAR(255) UNIQUE NOT NULL,
@@ -78,7 +97,7 @@ export const api = {
         );
       `;
 
-      await sql`
+      await connection`
         CREATE TABLE IF NOT EXISTS employees (
             id SERIAL PRIMARY KEY,
             name VARCHAR(255) UNIQUE NOT NULL,
@@ -88,7 +107,7 @@ export const api = {
         );
       `;
     } catch (e) {
-      console.error("Migration Error:", e);
+      console.warn("[v0] Migration warning:", e);
     }
   },
 
